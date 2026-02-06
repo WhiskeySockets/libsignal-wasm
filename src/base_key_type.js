@@ -4,4 +4,4 @@ const BaseKeyType = {
   THEIRS: 2
 };
 
-module.exports = BaseKeyType;
+export default BaseKeyType;

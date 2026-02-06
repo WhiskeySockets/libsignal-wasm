@@ -1,6 +1,6 @@
 // vim: ts=4:sw=4
 
-const BaseKeyType = require('./base_key_type');
+import BaseKeyType from './base_key_type.js';
 
 const CLOSED_SESSIONS_MAX = 40;
 const SESSION_RECORD_VERSION = 'v1';
@@ -313,4 +313,4 @@ class SessionRecord {
     }
 }
 
-module.exports = SessionRecord;
+export default SessionRecord;

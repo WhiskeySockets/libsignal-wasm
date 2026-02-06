@@ -1,22 +1,20 @@
 /*eslint-disable block-scoped-var, id-length, no-control-regex, no-magic-numbers, no-prototype-builtins, no-redeclare, no-shadow, no-var, sort-vars*/
-"use strict";
-
-var $protobuf = require("protobufjs/minimal");
+import $protobuf from "protobufjs/minimal.js";
 
 // Common aliases
-var $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.util;
+const $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.util;
 
 // Exported root namespace
-var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
+const $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
 
-$root.textsecure = (function() {
+export const textsecure = $root.textsecure = (() => {
 
     /**
      * Namespace textsecure.
      * @exports textsecure
      * @namespace
      */
-    var textsecure = {};
+    const textsecure = {};
 
     textsecure.WhisperMessage = (function() {
 
@@ -40,7 +38,7 @@ $root.textsecure = (function() {
          */
         function WhisperMessage(properties) {
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -139,9 +137,9 @@ $root.textsecure = (function() {
         WhisperMessage.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.textsecure.WhisperMessage();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.textsecure.WhisperMessage();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
                     message.ephemeralKey = reader.bytes();
@@ -216,7 +214,7 @@ $root.textsecure = (function() {
         WhisperMessage.fromObject = function fromObject(object) {
             if (object instanceof $root.textsecure.WhisperMessage)
                 return object;
-            var message = new $root.textsecure.WhisperMessage();
+            let message = new $root.textsecure.WhisperMessage();
             if (object.ephemeralKey != null)
                 if (typeof object.ephemeralKey === "string")
                     $util.base64.decode(object.ephemeralKey, message.ephemeralKey = $util.newBuffer($util.base64.length(object.ephemeralKey)), 0);
@@ -246,7 +244,7 @@ $root.textsecure = (function() {
         WhisperMessage.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.defaults) {
                 if (options.bytes === String)
                     object.ephemeralKey = "";
@@ -314,7 +312,7 @@ $root.textsecure = (function() {
          */
         function PreKeyWhisperMessage(properties) {
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -433,9 +431,9 @@ $root.textsecure = (function() {
         PreKeyWhisperMessage.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.textsecure.PreKeyWhisperMessage();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.textsecure.PreKeyWhisperMessage();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 5:
                     message.registrationId = reader.uint32();
@@ -522,7 +520,7 @@ $root.textsecure = (function() {
         PreKeyWhisperMessage.fromObject = function fromObject(object) {
             if (object instanceof $root.textsecure.PreKeyWhisperMessage)
                 return object;
-            var message = new $root.textsecure.PreKeyWhisperMessage();
+            let message = new $root.textsecure.PreKeyWhisperMessage();
             if (object.registrationId != null)
                 message.registrationId = object.registrationId >>> 0;
             if (object.preKeyId != null)
@@ -559,7 +557,7 @@ $root.textsecure = (function() {
         PreKeyWhisperMessage.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.defaults) {
                 object.preKeyId = 0;
                 if (options.bytes === String)
@@ -638,7 +636,7 @@ $root.textsecure = (function() {
          */
         function KeyExchangeMessage(properties) {
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -747,9 +745,9 @@ $root.textsecure = (function() {
         KeyExchangeMessage.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.textsecure.KeyExchangeMessage();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.textsecure.KeyExchangeMessage();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
                     message.id = reader.uint32();
@@ -830,7 +828,7 @@ $root.textsecure = (function() {
         KeyExchangeMessage.fromObject = function fromObject(object) {
             if (object instanceof $root.textsecure.KeyExchangeMessage)
                 return object;
-            var message = new $root.textsecure.KeyExchangeMessage();
+            let message = new $root.textsecure.KeyExchangeMessage();
             if (object.id != null)
                 message.id = object.id >>> 0;
             if (object.baseKey != null)
@@ -868,7 +866,7 @@ $root.textsecure = (function() {
         KeyExchangeMessage.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.defaults) {
                 object.id = 0;
                 if (options.bytes === String)
@@ -930,4 +928,4 @@ $root.textsecure = (function() {
     return textsecure;
 })();
 
-module.exports = $root;
+export { $root as default };

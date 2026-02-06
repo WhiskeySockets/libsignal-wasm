@@ -1,13 +1,11 @@
 
-'use strict';
-
-const BaseKeyType = require('./base_key_type');
-const ChainType = require('./chain_type');
-const SessionRecord = require('./session_record');
-const crypto = require('./crypto');
-const curve = require('./curve');
-const errors = require('./errors');
-const queueJob = require('./queue_job');
+import BaseKeyType from './base_key_type.js';
+import ChainType from './chain_type.js';
+import SessionRecord from './session_record.js';
+import * as crypto from './crypto.js';
+import * as curve from './curve.js';
+import * as errors from './errors.js';
+import queueJob from './queue_job.js';
 
 
 class SessionBuilder {
@@ -64,11 +62,11 @@ class SessionBuilder {
         const preKeyPair = await this.storage.loadPreKey(message.preKeyId);
         if (message.preKeyId && !preKeyPair) {
             throw new errors.PreKeyError('Invalid PreKey ID');
-        }   
+        }
         const signedPreKeyPair = await this.storage.loadSignedPreKey(message.signedPreKeyId);
-        if (!signedPreKeyPair) { 
+        if (!signedPreKeyPair) {
             throw new errors.PreKeyError("Missing SignedPreKey");
-        }   
+        }
         const existingOpenSession = record.getOpenSession();
         if (existingOpenSession) {
             console.warn("Closing open session in favor of incoming prekey bundle");
@@ -161,4 +159,4 @@ class SessionBuilder {
     }
 }
 
-module.exports = SessionBuilder;
+export default SessionBuilder;

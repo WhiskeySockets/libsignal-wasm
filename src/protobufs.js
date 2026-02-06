@@ -1,10 +1,5 @@
-'use strict';
+import { textsecure } from './WhisperTextProtocol.js';
 
-const {
-    textsecure: {
-        WhisperMessage,
-        PreKeyWhisperMessage
-    }
-} = require('./WhisperTextProtocol.js');
+const { WhisperMessage, PreKeyWhisperMessage } = textsecure;
 
-module.exports = { WhisperMessage, PreKeyWhisperMessage };
+export { WhisperMessage, PreKeyWhisperMessage };

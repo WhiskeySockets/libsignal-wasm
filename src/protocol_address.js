@@ -37,4 +37,4 @@ class ProtocolAddress {
     }
 }
 
-module.exports = ProtocolAddress;
+export default ProtocolAddress;

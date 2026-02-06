@@ -1,10 +1,9 @@
 // vim: ts=4:sw=4:expandtab
- 
+
  /*
   * jobQueue manages multiple queues indexed by device to serialize
   * session io ops on the database.
   */
-'use strict';
 
 
 const _queueAsyncBuckets = new Map();
@@ -37,7 +36,7 @@ async function _asyncQueueExecutor(queue, cleanup) {
     cleanup();
 }
 
-module.exports = function(bucket, awaitable) {
+export default function(bucket, awaitable) {
     /* Run the async awaitable only when all other async calls registered
      * here have completed (or thrown).  The bucket argument is a hashable
      * key representing the task queue to use. */
@@ -66,4 +65,4 @@ module.exports = function(bucket, awaitable) {
         _asyncQueueExecutor(queue, () => _queueAsyncBuckets.delete(bucket));
     }
     return job;
-};
+}

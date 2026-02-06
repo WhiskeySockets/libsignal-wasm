@@ -1,8 +1,9 @@
 {
-  "name": "@whiskeysockets/libsignal-node",
-  "version": "2.0.1",
-  "description": "Open Whisper Systems' libsignal for Node.js",
-  "repository": "WhiskeySockets/libsignal-node",
+  "name": "@whiskeysockets/libsignal-wasm",
+  "version": "2.0.2",
+  "description": "Open Whisper Systems' libsignal for javascript",
+  "repository": "WhiskeySockets/libsignal-wasm",
+  "type": "module",
   "main": "index.js",
   "types": "index.d.ts",
   "keywords": [
@@ -12,11 +13,20 @@
   ],
   "license": "GPL-3.0",
   "dependencies": {
-    "curve25519-js": "^0.0.4",
+    "curve25519-js": "0.0.4",
     "protobufjs": "6.8.8"
+  },
+  "peerDependencies": {
+    "whatsapp-rust-bridge": ">=0.5.0"
+  },
+  "peerDependenciesMeta": {
+    "whatsapp-rust-bridge": {
+      "optional": true
+    }
   },
   "files": [
     "src/*",
+    "index.js",
     "index.d.ts"
   ],
   "devDependencies": {

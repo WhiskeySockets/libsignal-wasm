@@ -1,9 +1,10 @@
 // vim: ts=4:sw=4
 
-'use strict';
+import nodeCrypto from 'crypto';
+import assert from 'assert';
 
-const nodeCrypto = require('crypto');
-const assert = require('assert');
+let wasm = null;
+try { wasm = await import('whatsapp-rust-bridge'); } catch {}
 
 
 function assertBuffer(value) {
@@ -14,7 +15,7 @@ function assertBuffer(value) {
 }
 
 
-function encrypt(key, data, iv) {
+export function encrypt(key, data, iv) {
     assertBuffer(key);
     assertBuffer(data);
     assertBuffer(iv);
@@ -23,7 +24,7 @@ function encrypt(key, data, iv) {
 }
 
 
-function decrypt(key, data, iv) {
+export function decrypt(key, data, iv) {
     assertBuffer(key);
     assertBuffer(data);
     assertBuffer(iv);
@@ -32,7 +33,7 @@ function decrypt(key, data, iv) {
 }
 
 
-function calculateMAC(key, data) {
+export function calculateMAC(key, data) {
     assertBuffer(key);
     assertBuffer(data);
     const hmac = nodeCrypto.createHmac('sha256', key);
@@ -41,7 +42,7 @@ function calculateMAC(key, data) {
 }
 
 
-function hash(data) {
+export function hash(data) {
     assertBuffer(data);
     const sha512 = nodeCrypto.createHash('sha512');
     sha512.update(data);
@@ -50,7 +51,7 @@ function hash(data) {
 
 
 // Salts always end up being 32 bytes
-function deriveSecrets(input, salt, info, chunks) {
+export function deriveSecrets(input, salt, info, chunks) {
     // Specific implementation of RFC 5869 that only returns the first 3 32-byte chunks
     assertBuffer(input);
     assertBuffer(salt);
@@ -60,6 +61,14 @@ function deriveSecrets(input, salt, info, chunks) {
     }
     chunks = chunks || 3;
     assert(chunks >= 1 && chunks <= 3);
+
+    if (wasm) {
+        const result = wasm.hkdf(input, chunks * 32, { salt, info: info.toString('utf8') });
+        return Array.from({ length: chunks }, (_, i) =>
+            Buffer.from(result.slice(i * 32, (i + 1) * 32))
+        );
+    }
+
     const PRK = calculateMAC(salt, input);
     const infoArray = new Uint8Array(info.byteLength + 1 + 32);
     infoArray.set(info, 32);
@@ -78,7 +87,7 @@ function deriveSecrets(input, salt, info, chunks) {
     return signed;
 }
 
-function verifyMAC(data, key, mac, length) {
+export function verifyMAC(data, key, mac, length) {
     const calculatedMac = calculateMAC(key, data).slice(0, length);
     if (mac.length !== length || calculatedMac.length !== length) {
         throw new Error("Bad MAC length");
@@ -87,12 +96,3 @@ function verifyMAC(data, key, mac, length) {
         throw new Error("Bad MAC");
     }
 }
-
-module.exports = {
-    deriveSecrets,
-    decrypt,
-    encrypt,
-    hash,
-    calculateMAC,
-    verifyMAC
-};

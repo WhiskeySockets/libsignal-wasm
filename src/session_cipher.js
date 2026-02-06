@@ -1,14 +1,14 @@
 // vim: ts=4:sw=4:expandtab
 
-const ChainType = require('./chain_type');
-const ProtocolAddress = require('./protocol_address');
-const SessionBuilder = require('./session_builder');
-const SessionRecord = require('./session_record');
-const crypto = require('./crypto');
-const curve = require('./curve');
-const errors = require('./errors');
-const protobufs = require('./protobufs');
-const queueJob = require('./queue_job');
+import ChainType from './chain_type.js';
+import ProtocolAddress from './protocol_address.js';
+import SessionBuilder from './session_builder.js';
+import SessionRecord from './session_record.js';
+import * as crypto from './crypto.js';
+import * as curve from './curve.js';
+import * as errors from './errors.js';
+import * as protobufs from './protobufs.js';
+import queueJob from './queue_job.js';
 
 const VERSION = 3;
 
@@ -48,7 +48,7 @@ class SessionCipher {
     async getRecord() {
         const record = await this.storage.loadSession(this.addr.toString());
         if (record && !(record instanceof SessionRecord)) {
-            throw new TypeError('SessionRecord type expected from loadSession'); 
+            throw new TypeError('SessionRecord type expected from loadSession');
         }
         return record;
     }
@@ -139,10 +139,10 @@ class SessionCipher {
         // Stop and return the result if we get a valid result.
         if (!sessions.length) {
             throw new errors.SessionError("No sessions available");
-        }   
+        }
         const errs = [];
         for (const session of sessions) {
-            let plaintext; 
+            let plaintext;
             try {
                 plaintext = await this.doDecryptWhisperMessage(data, session);
                 session.indexInfo.used = Date.now();
@@ -172,7 +172,7 @@ class SessionCipher {
             const remoteIdentityKey = result.session.indexInfo.remoteIdentityKey;
             if (!await this.storage.isTrustedIdentity(this.addr.id, remoteIdentityKey)) {
                 throw new errors.UntrustedIdentityKeyError(this.addr.id, remoteIdentityKey);
-            }   
+            }
             if (record.isClosed(result.session)) {
                 // It's possible for this to happen when processing a backlog of messages.
                 // The message was, hopefully, just sent back in a time when this session
@@ -333,4 +333,4 @@ class SessionCipher {
     }
 }
 
-module.exports = SessionCipher;
+export default SessionCipher;

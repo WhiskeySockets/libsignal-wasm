@@ -3,7 +3,6 @@ import {
     ProtocolAddress as WasmProtocolAddress,
 } from 'whatsapp-rust-bridge';
 import { createStorageAdapter } from './storage_adapter.js';
-import queueJob from './queue_job.js';
 
 class SessionBuilder {
 
@@ -14,9 +13,7 @@ class SessionBuilder {
     }
 
     async initOutgoing(device) {
-        return await queueJob(this.addr.toString(), async () => {
-            return await this.builder.processPreKeyBundle(device);
-        });
+        return await this.builder.processPreKeyBundle(device);
     }
 }
 

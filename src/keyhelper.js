@@ -1,45 +1,38 @@
-// vim: ts=4:sw=4:expandtab
+import {
+    generateKeyPair,
+    generatePreKey as wasmGeneratePreKey,
+    generateSignedPreKey as wasmGenerateSignedPreKey,
+    generateRegistrationId as wasmGenerateRegistrationId,
+} from 'whatsapp-rust-bridge';
 
-import * as curve from './curve.js';
-import nodeCrypto from 'crypto';
-
-function isNonNegativeInteger(n) {
-    return (typeof n === 'number' && (n % 1) === 0  && n >= 0);
+export function generateIdentityKeyPair() {
+    const kp = generateKeyPair();
+    return { pubKey: Buffer.from(kp.pubKey), privKey: Buffer.from(kp.privKey) };
 }
 
-export const generateIdentityKeyPair = curve.generateKeyPair;
-
 export function generateRegistrationId() {
-    var registrationId = Uint16Array.from(nodeCrypto.randomBytes(2))[0];
-    return registrationId & 0x3fff;
+    return wasmGenerateRegistrationId();
 }
 
 export function generateSignedPreKey(identityKeyPair, signedKeyId) {
-    if (!(identityKeyPair.privKey instanceof Buffer) ||
-        identityKeyPair.privKey.byteLength != 32 ||
-        !(identityKeyPair.pubKey instanceof Buffer) ||
-        identityKeyPair.pubKey.byteLength != 33) {
-        throw new TypeError('Invalid argument for identityKeyPair');
-    }
-    if (!isNonNegativeInteger(signedKeyId)) {
-        throw new TypeError('Invalid argument for signedKeyId: ' + signedKeyId);
-    }
-    const keyPair = curve.generateKeyPair();
-    const sig = curve.calculateSignature(identityKeyPair.privKey, keyPair.pubKey);
+    const spk = wasmGenerateSignedPreKey(identityKeyPair, signedKeyId);
     return {
-        keyId: signedKeyId,
-        keyPair: keyPair,
-        signature: sig
+        keyId: spk.keyId,
+        keyPair: {
+            pubKey: Buffer.from(spk.keyPair.pubKey),
+            privKey: Buffer.from(spk.keyPair.privKey),
+        },
+        signature: Buffer.from(spk.signature),
     };
 }
 
 export function generatePreKey(keyId) {
-    if (!isNonNegativeInteger(keyId)) {
-        throw new TypeError('Invalid argument for keyId: ' + keyId);
-    }
-    const keyPair = curve.generateKeyPair();
+    const pk = wasmGeneratePreKey(keyId);
     return {
-        keyId,
-        keyPair
+        keyId: pk.keyId,
+        keyPair: {
+            pubKey: Buffer.from(pk.keyPair.pubKey),
+            privKey: Buffer.from(pk.keyPair.privKey),
+        },
     };
 }

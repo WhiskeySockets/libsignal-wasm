@@ -24,9 +24,9 @@ export interface SignalStorage {
     id: number | string
   ): Promise<{ privKey: Buffer; pubKey: Buffer } | undefined>;
   removePreKey(id: number): void;
-  loadSignedPreKey(): { privKey: Buffer; pubKey: Buffer };
+  loadSignedPreKey(id: number): Promise<{ privKey: Buffer; pubKey: Buffer } | undefined> | { privKey: Buffer; pubKey: Buffer };
   getOurRegistrationId(): Promise<number> | number;
-  getOurIdentity(): { privKey: Buffer; pubKey: Buffer };
+  getOurIdentity(): Promise<{ privKey: Buffer; pubKey: Buffer }> | { privKey: Buffer; pubKey: Buffer };
 }
 
 export class ProtocolAddress {
@@ -46,7 +46,9 @@ export class SessionCipher {
   constructor(storage: SignalStorage, remoteAddress: ProtocolAddress);
   public decryptPreKeyWhisperMessage(ciphertext: Uint8Array): Promise<Buffer>;
   public decryptWhisperMessage(ciphertext: Uint8Array): Promise<Buffer>;
-  public encrypt(data: Uint8Array): Promise<{ type: number; body: string }>;
+  public encrypt(data: Uint8Array): Promise<{ type: number; body: Buffer }>;
+  public hasOpenSession(): Promise<boolean>;
+  public closeOpenSession(): Promise<void>;
 }
 
 export class SessionBuilder {

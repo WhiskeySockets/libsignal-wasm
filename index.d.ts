@@ -24,7 +24,7 @@ export interface SignalStorage {
     id: number | string
   ): Promise<{ privKey: Buffer; pubKey: Buffer } | undefined>;
   removePreKey(id: number): void;
-  loadSignedPreKey(id: number): Promise<{ privKey: Buffer; pubKey: Buffer } | undefined> | { privKey: Buffer; pubKey: Buffer };
+  loadSignedPreKey(id: number): Promise<{ privKey: Buffer; pubKey: Buffer } | undefined> | { privKey: Buffer; pubKey: Buffer } | undefined;
   getOurRegistrationId(): Promise<number> | number;
   getOurIdentity(): Promise<{ privKey: Buffer; pubKey: Buffer }> | { privKey: Buffer; pubKey: Buffer };
 }

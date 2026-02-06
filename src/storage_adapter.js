@@ -6,7 +6,7 @@ export function createStorageAdapter(storage) {
             const record = await storage.loadSession(address);
             if (!record) return null;
             // Our SessionRecord wrapper — extract the bytes
-            if (record._wasmRecord) return record._wasmRecord.serialize();
+            if (record._wasmRecord?.serialize) return record._wasmRecord.serialize();
             // Raw Uint8Array/Buffer
             if (record instanceof Uint8Array) return record;
             // Legacy JS SessionRecord — pass serialize() result

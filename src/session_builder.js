@@ -15,7 +15,7 @@ class SessionBuilder {
 
     async initOutgoing(device) {
         return await queueJob(this.addr.toString(), async () => {
-            await this.builder.processPreKeyBundle(device);
+            return await this.builder.processPreKeyBundle(device);
         });
     }
 }

@@ -3,7 +3,7 @@ import { SessionRecord as WasmSessionRecord } from 'whatsapp-rust-bridge';
 class SessionRecord {
 
     constructor(wasmRecord) {
-        if (wasmRecord !== undefined) {
+        if (wasmRecord != null) {
             this._wasmRecord = wasmRecord;
         } else {
             // Create empty record (no open sessions)

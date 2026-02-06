@@ -2,9 +2,7 @@
 
 import nodeCrypto from 'crypto';
 import assert from 'assert';
-
-let wasm = null;
-try { wasm = await import('whatsapp-rust-bridge'); } catch {}
+import { hkdf } from 'whatsapp-rust-bridge';
 
 
 function assertBuffer(value) {
@@ -62,29 +60,10 @@ export function deriveSecrets(input, salt, info, chunks) {
     chunks = chunks || 3;
     assert(chunks >= 1 && chunks <= 3);
 
-    if (wasm) {
-        const result = wasm.hkdf(input, chunks * 32, { salt, info: info.toString('utf8') });
-        return Array.from({ length: chunks }, (_, i) =>
-            Buffer.from(result.slice(i * 32, (i + 1) * 32))
-        );
-    }
-
-    const PRK = calculateMAC(salt, input);
-    const infoArray = new Uint8Array(info.byteLength + 1 + 32);
-    infoArray.set(info, 32);
-    infoArray[infoArray.length - 1] = 1;
-    const signed = [calculateMAC(PRK, Buffer.from(infoArray.slice(32)))];
-    if (chunks > 1) {
-        infoArray.set(signed[signed.length - 1]);
-        infoArray[infoArray.length - 1] = 2;
-        signed.push(calculateMAC(PRK, Buffer.from(infoArray)));
-    }
-    if (chunks > 2) {
-        infoArray.set(signed[signed.length - 1]);
-        infoArray[infoArray.length - 1] = 3;
-        signed.push(calculateMAC(PRK, Buffer.from(infoArray)));
-    }
-    return signed;
+    const result = hkdf(input, chunks * 32, { salt, info: info.toString('utf8') });
+    return Array.from({ length: chunks }, (_, i) =>
+        Buffer.from(result.slice(i * 32, (i + 1) * 32))
+    );
 }
 
 export function verifyMAC(data, key, mac, length) {

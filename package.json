@@ -13,16 +13,8 @@
   ],
   "license": "GPL-3.0",
   "dependencies": {
-    "curve25519-js": "0.0.4",
-    "protobufjs": "6.8.8"
-  },
-  "peerDependencies": {
+    "protobufjs": "6.8.8",
     "whatsapp-rust-bridge": ">=0.5.0"
-  },
-  "peerDependenciesMeta": {
-    "whatsapp-rust-bridge": {
-      "optional": true
-    }
   },
   "files": [
     "src/*",

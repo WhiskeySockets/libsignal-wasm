@@ -1,24 +1,7 @@
 
-import curveJs from 'curve25519-js';
-import nodeCrypto from 'crypto';
-
-let wasm = null;
-try { wasm = await import('whatsapp-rust-bridge'); } catch {}
-
-// from: https://github.com/digitalbazaar/x25519-key-agreement-key-2019/blob/master/lib/crypto.js
-const PUBLIC_KEY_DER_PREFIX = Buffer.from([
-    48, 42, 48, 5, 6, 3, 43, 101, 110, 3, 33, 0
-]);
-
-const PRIVATE_KEY_DER_PREFIX = Buffer.from([
-    48, 46, 2, 1, 0, 48, 5, 6, 3, 43, 101, 110, 4, 34, 4, 32
-]);
-
-const KEY_BUNDLE_TYPE = Buffer.from([5]);
-
-const prefixKeyInPublicKey = function (pubKey) {
-  return Buffer.concat([KEY_BUNDLE_TYPE, pubKey]);
-};
+import { generateKeyPair as wasmGenerateKeyPair, calculateAgreement as wasmCalculateAgreement,
+         calculateSignature as wasmCalculateSignature, verifySignature as wasmVerifySignature,
+         getPublicFromPrivateKey as wasmGetPublicFromPrivateKey } from 'whatsapp-rust-bridge';
 
 function validatePrivKey(privKey) {
     if (privKey === undefined) {
@@ -47,131 +30,40 @@ function scrubPubKeyFormat(pubKey) {
     }
 }
 
-function unclampEd25519PrivateKey(clampedSk) {
-    const unclampedSk = new Uint8Array(clampedSk);
-
-    // Fix the first byte
-    unclampedSk[0] |= 6; // Ensure last 3 bits match expected `110` pattern
-
-    // Fix the last byte
-    unclampedSk[31] |= 128; // Restore the highest bit
-    unclampedSk[31] &= ~64; // Clear the second-highest bit
-
-    return unclampedSk;
-}
-
 export function getPublicFromPrivateKey(privKey) {
-    if (wasm) {
-        return Buffer.from(wasm.getPublicFromPrivateKey(privKey));
-    }
-    const unclampedPK = unclampEd25519PrivateKey(privKey);
-    const keyPair = curveJs.generateKeyPair(unclampedPK);
-    return prefixKeyInPublicKey(Buffer.from(keyPair.public));
+    return Buffer.from(wasmGetPublicFromPrivateKey(privKey));
 }
 
 export function generateKeyPair() {
-    if (wasm) {
-        const kp = wasm.generateKeyPair();
-        return {
-            pubKey: Buffer.from(kp.pubKey),
-            privKey: Buffer.from(kp.privKey)
-        };
-    }
-    try {
-        const {publicKey: publicDerBytes, privateKey: privateDerBytes} = nodeCrypto.generateKeyPairSync(
-            'x25519',
-            {
-                publicKeyEncoding: { format: 'der', type: 'spki' },
-                privateKeyEncoding: { format: 'der', type: 'pkcs8' }
-            }
-        );
-        const pubKey = publicDerBytes.slice(PUBLIC_KEY_DER_PREFIX.length, PUBLIC_KEY_DER_PREFIX.length + 32);
-
-        const privKey = privateDerBytes.slice(PRIVATE_KEY_DER_PREFIX.length, PRIVATE_KEY_DER_PREFIX.length + 32);
-
-        return {
-            pubKey: prefixKeyInPublicKey(pubKey),
-            privKey
-        };
-    } catch(e) {
-        const keyPair = curveJs.generateKeyPair(nodeCrypto.randomBytes(32));
-        return {
-            privKey: Buffer.from(keyPair.private),
-            pubKey: prefixKeyInPublicKey(Buffer.from(keyPair.public)),
-        };
-    }
+    const kp = wasmGenerateKeyPair();
+    return {
+        pubKey: Buffer.from(kp.pubKey),
+        privKey: Buffer.from(kp.privKey)
+    };
 }
 
 export function calculateAgreement(pubKey, privKey) {
-    if (wasm) {
-        pubKey = scrubPubKeyFormat(pubKey);
-        validatePrivKey(privKey);
-        return Buffer.from(wasm.calculateAgreement(pubKey, privKey));
-    }
     pubKey = scrubPubKeyFormat(pubKey);
     validatePrivKey(privKey);
-    if (!pubKey || pubKey.byteLength != 32) {
-        throw new Error("Invalid public key");
-    }
-
-    if(typeof nodeCrypto.diffieHellman === 'function') {
-        const nodePrivateKey = nodeCrypto.createPrivateKey({
-            key: Buffer.concat([PRIVATE_KEY_DER_PREFIX, privKey]),
-            format: 'der',
-            type: 'pkcs8'
-        });
-        const nodePublicKey = nodeCrypto.createPublicKey({
-            key: Buffer.concat([PUBLIC_KEY_DER_PREFIX, pubKey]),
-            format: 'der',
-            type: 'spki'
-        });
-
-        return nodeCrypto.diffieHellman({
-            privateKey: nodePrivateKey,
-            publicKey: nodePublicKey,
-        });
-    } else {
-        const secret = curveJs.sharedKey(privKey, pubKey);
-        return Buffer.from(secret);
-    }
+    return Buffer.from(wasmCalculateAgreement(pubKey, privKey));
 }
 
 export function calculateSignature(privKey, message) {
-    if (wasm) {
-        validatePrivKey(privKey);
-        if (!message) {
-            throw new Error("Invalid message");
-        }
-        return Buffer.from(wasm.calculateSignature(privKey, message));
-    }
     validatePrivKey(privKey);
     if (!message) {
         throw new Error("Invalid message");
     }
-    return Buffer.from(curveJs.sign(privKey, message));
+    return Buffer.from(wasmCalculateSignature(privKey, message));
 }
 
 export function verifySignature(pubKey, msg, sig, isInit) {
     if (isInit) return true;
-    if (wasm) {
-        pubKey = scrubPubKeyFormat(pubKey);
-        if (!msg) {
-            throw new Error("Invalid message");
-        }
-        if (!sig || sig.byteLength != 64) {
-            throw new Error("Invalid signature");
-        }
-        return wasm.verifySignature(pubKey, msg, sig);
-    }
     pubKey = scrubPubKeyFormat(pubKey);
-    if (!pubKey || pubKey.byteLength != 32) {
-        throw new Error("Invalid public key");
-    }
     if (!msg) {
         throw new Error("Invalid message");
     }
     if (!sig || sig.byteLength != 64) {
         throw new Error("Invalid signature");
     }
-    return curveJs.verify(pubKey, msg, sig);
+    return wasmVerifySignature(pubKey, msg, sig);
 }
